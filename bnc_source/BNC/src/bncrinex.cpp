@@ -183,7 +183,7 @@ t_irc bncRinex::downloadSkeleton() {
       }
     }
 
-    bncNetQuery* query = new bncNetQueryV2(true);
+    bncNetQuery* query = new bncNetQueryV2(true,false,2);
     QByteArray outData;
     url = sklDir + "/" + staID;
     query->waitForRequestResult(url, outData);

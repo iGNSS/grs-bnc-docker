@@ -91,7 +91,7 @@ bncTableDlg::bncTableDlg(QWidget* parent) : QDialog(parent) {
   }
 
   _ntripVersionComboBox = new QComboBox();
-  _ntripVersionComboBox->addItems(QString("1,2,2s,R,U").split(","));
+  _ntripVersionComboBox->addItems(QString("1,1s,2,2s,R,U").split(","));
   int kk = _ntripVersionComboBox->findText(settings.value("ntripVersion").toString());
   if (kk != -1) {
     _ntripVersionComboBox->setCurrentIndex(kk);
@@ -212,13 +212,16 @@ t_irc bncTableDlg::getFullTable(const QString& ntripVersion,
 
   bncNetQuery* query = 0;
   if      (ntripVersion == "2") {
-    query = new bncNetQueryV2(false);
+    query = new bncNetQueryV2(false,false,2);
   }
   else if (ntripVersion == "2s") {
-    query = new bncNetQueryV2(true);
+    query = new bncNetQueryV2(true,false,2);
+  }
+  else if (ntripVersion == "1s") {
+    query = new bncNetQueryV1(true);
   }
   else {
-    query = new bncNetQueryV1();
+    query = new bncNetQueryV1(false);
   }
 
   QUrl url;
@@ -462,6 +465,9 @@ void bncTableDlg::slotNewCaster(QString newCasterHost, QString newCasterPort) {
   if (ntripVersion == "2s") {
     url.setScheme("https");
   }
+  else if (ntripVersion == "1s") {
+    url.setScheme("https");
+  }
   else {
     url.setScheme("http");
   }
@@ -534,13 +540,16 @@ bncCasterTableDlg::bncCasterTableDlg(const QString& ntripVersion,
 
   bncNetQuery* query = 0;
   if (ntripVersion == "2") {
-    query = new bncNetQueryV2(false);
+    query = new bncNetQueryV2(false,false,2);
   }
   else if (ntripVersion == "2s") {
-    query = new bncNetQueryV2(true);
+    query = new bncNetQueryV2(true,false,2);
+  }
+  else if (ntripVersion == "1s") {
+    query = new bncNetQueryV1(true);
   }
   else {
-    query = new bncNetQueryV1();
+    query = new bncNetQueryV1(false);
   }
 
   QByteArray outData;

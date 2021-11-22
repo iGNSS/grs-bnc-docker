@@ -5,7 +5,7 @@
 
 class bncNetQueryV1 : public bncNetQuery {
  public:
-  bncNetQueryV1();
+  bncNetQueryV1(bool secureServer);
   virtual ~bncNetQueryV1();
 
   virtual void stop();
@@ -18,7 +18,8 @@ class bncNetQueryV1 : public bncNetQuery {
   void startRequestPrivate(const QUrl& url, const QByteArray& gga, 
                            bool sendRequestOnly);
   QEventLoop* _eventLoop;
-  QTcpSocket* _socket;
+  QSslSocket* _socket;
+  bool                   _secureServer;
 };
 
 #endif

@@ -76,6 +76,8 @@ void bncSettings::reRead() {
     setValue_p("proxyPort",           "");
     setValue_p("sslCaCertPath",       "");
     setValue_p("sslIgnoreErrors",     "0");
+    setValue_p("sslClientCertPath",       "");
+    setValue_p("sslClientKeyPath",       "");
     // General
     setValue_p("logFile",             "");
     setValue_p("rnxAppend",           "0");

@@ -45,8 +45,26 @@ bncSslConfig::bncSslConfig() :
     QString fileName = it.next();
     caCerts += QSslCertificate::fromPath(dirName+QDir::separator()+fileName);
   }
- 
   this->setCaCertificates(caCerts);
+  
+  // Get client certificate
+  QString certificateFileName = settings.value("sslClientCertPath").toString();
+  if (!certificateFileName.isEmpty()) {
+    QFile certificateFile(certificateFileName);
+    certificateFile.open(QIODevice::ReadOnly);
+    QSslCertificate certificate(&certificateFile);
+    this->setLocalCertificate(certificate);
+  }
+  
+  // Get client private key
+  QString privateKeyFileName = settings.value("sslClientKeyPath").toString();
+  if (!privateKeyFileName.isEmpty()) {
+    QFile privateKeyFile(privateKeyFileName);
+    privateKeyFile.open(QIODevice::ReadOnly);
+    QSslKey privateKey(&privateKeyFile, QSsl::Rsa);
+    this->setPrivateKey(privateKey);
+  }
+
 }
 
 // Destructor

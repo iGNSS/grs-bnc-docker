@@ -20,12 +20,14 @@
 #include "bncnetqueryv1.h"
 #include "bncsettings.h"
 #include "bncversion.h"
+#include "bncsslconfig.h"
 
 using namespace std;
 
 // Constructor
 ////////////////////////////////////////////////////////////////////////////
-bncNetQueryV1::bncNetQueryV1() {
+bncNetQueryV1::bncNetQueryV1(bool secureServer) {
+  _secureServer    = secureServer;
   _socket    = 0;
   _eventLoop = new QEventLoop(this);
   _timeOut   = 20000;
@@ -55,9 +57,15 @@ void bncNetQueryV1::stop() {
 void bncNetQueryV1::waitForRequestResult(const QUrl& url, QByteArray& outData){
 
   delete _socket;
-  _socket = new QTcpSocket();
-
-  connect(_socket, SIGNAL(disconnected()), _eventLoop, SLOT(quit()));
+  _socket = new QSslSocket();
+  bncSslConfig sslConfig;
+  
+  if (_secureServer) {
+    _socket->setSslConfiguration(sslConfig);
+    connect(_socket, SIGNAL(encrypted()), _eventLoop, SLOT(quit()));
+  } else {
+    connect(_socket, SIGNAL(disconnected()), _eventLoop, SLOT(quit()));
+  }
 
   startRequestPrivate(url, "", true);
 
@@ -86,13 +94,13 @@ void bncNetQueryV1::waitForReadyRead(QByteArray& outData) {
         QString errStr = _socket->errorString();
         if (errStr.isEmpty()) {
           errStr = "Read timeout";
-	}
-        delete _socket;
-        _socket = 0;
-        _status = error;
-        emit newMessage(_url.path().toAscii().replace(0,1,"")
-                        + ": " + errStr.toAscii(), true);
-        return;
+	      }
+          delete _socket;
+          _socket = 0;
+          _status = error;
+          emit newMessage(_url.path().toAscii().replace(0,1,"")
+                          + ": " + errStr.toAscii(), true);
+          return;
       }
     }
   }
@@ -124,22 +132,33 @@ void bncNetQueryV1::keepAliveRequest(const QUrl& url, const QByteArray& gga) {
   // Connect the Socket
   // ------------------
   bncSettings settings;
+  bncSslConfig sslConfig;
   QString proxyHost = settings.value("proxyHost").toString();
   int     proxyPort = settings.value("proxyPort").toInt();
 
-  if ( proxyHost.isEmpty() ) {
-    _socket->connectToHost(_url.host(), _url.port());
+  if (_secureServer) {
+    _socket->setSslConfiguration(sslConfig);
+    _socket->connectToHostEncrypted(_url.host(), _url.port());
+    if (!_socket->waitForEncrypted(_timeOut)) {
+      delete _socket;
+      _socket = 0;
+      _status = error;
+      return;
+    }
+  } else {
+    if ( proxyHost.isEmpty() ) {
+      _socket->connectToHost(_url.host(), _url.port());
+    }
+    else {
+      _socket->connectToHost(proxyHost, proxyPort);
+    }
   }
-  else {
-    _socket->connectToHost(proxyHost, proxyPort);
-  }
-  if (!_socket->waitForConnected(_timeOut)) {
-    delete _socket;
-    _socket = 0;
-    _status = error;
-    return;
-  }
-
+    if (!_socket->waitForConnected(_timeOut)) {
+      delete _socket;
+      _socket = 0;
+      _status = error;
+      return;
+    }
   // Send Request
   // ------------
    QByteArray reqStr;
@@ -173,7 +192,7 @@ void bncNetQueryV1::startRequestPrivate(const QUrl& url,
 
   if (!sendRequestOnly) {
     delete _socket;
-    _socket = new QTcpSocket();
+    _socket = new QSslSocket();
   }
 
   // Default scheme and path
@@ -189,21 +208,33 @@ void bncNetQueryV1::startRequestPrivate(const QUrl& url,
   // Connect the Socket
   // ------------------
   bncSettings settings;
+  bncSslConfig sslConfig;
   QString proxyHost = settings.value("proxyHost").toString();
   int     proxyPort = settings.value("proxyPort").toInt();
  
-  if ( proxyHost.isEmpty() ) {
-    _socket->connectToHost(_url.host(), _url.port());
+  if (_secureServer) {
+    _socket->setSslConfiguration(sslConfig);
+    _socket->connectToHostEncrypted(_url.host(), _url.port());
+    if (!_socket->waitForEncrypted(_timeOut)) {
+      delete _socket;
+      _socket = 0;
+      _status = error;
+      return;
+    }
+  } else {
+    if ( proxyHost.isEmpty() ) {
+      _socket->connectToHost(_url.host(), _url.port());
+    }
+    else {
+      _socket->connectToHost(proxyHost, proxyPort);
+    }
   }
-  else {
-    _socket->connectToHost(proxyHost, proxyPort);
-  }
-  if (!_socket->waitForConnected(_timeOut)) {
-    delete _socket; 
-    _socket = 0;
-    _status = error;
-    return;
-  }
+    if (!_socket->waitForConnected(_timeOut)) {
+      delete _socket;
+      _socket = 0;
+      _status = error;
+      return;
+    }
 
   // Send Request
   // ------------
@@ -211,7 +242,7 @@ void bncNetQueryV1::startRequestPrivate(const QUrl& url,
   QString passW = QUrl::fromPercentEncoding(_url.password().toAscii());
   QByteArray userAndPwd;
 
-  if(!uName.isEmpty() || !passW.isEmpty()) {
+  if (!uName.isEmpty() || !passW.isEmpty()) {
     userAndPwd = "Authorization: Basic " + (uName.toAscii() + ":" +
     passW.toAscii()).toBase64() + "\r\n";
   }
@@ -269,10 +300,10 @@ void bncNetQueryV1::startRequestPrivate(const QUrl& url,
         if (line.trimmed().isEmpty()) {
           if (proxyResponse) {
             proxyResponse = false;
-    	}
-    	else {
+    	    }  
+    	    else {
             break;
-    	}
+    	    } 
         }
     
         if (line.indexOf("Unauthorized") != -1) {
@@ -285,8 +316,8 @@ void bncNetQueryV1::startRequestPrivate(const QUrl& url,
           response.clear();
           if (_socket->canReadLine()) {
             _socket->readLine();
-    	}
-    	break;
+    	    }
+    	    break;
         }
       }
       else if (!_socket->waitForReadyRead(_timeOut)) {

@@ -716,11 +716,13 @@ t_irc bncGetThread::tryReconnect() {
     } else if (_ntripVersion == "UN") {
       _query = new bncNetQueryUdp0();
     } else if (_ntripVersion == "2") {
-      _query = new bncNetQueryV2(false);
+      _query = new bncNetQueryV2(false,false,2);
     } else if (_ntripVersion == "2s") {
-      _query = new bncNetQueryV2(true);
+      _query = new bncNetQueryV2(true,false,2);
+    } else if (_ntripVersion == "1s") {
+      _query = new bncNetQueryV1(true);
     } else {
-      _query = new bncNetQueryV1();
+      _query = new bncNetQueryV1(false);
     }
     if (_nmea == "yes") {
       if (_serialNMEA == MANUAL_NMEA) {

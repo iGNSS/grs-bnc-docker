@@ -24,8 +24,10 @@
 
 // Constructor
 ////////////////////////////////////////////////////////////////////////////
-bncNetQueryV2::bncNetQueryV2(bool secure) {
-  _secure    = secure;
+bncNetQueryV2::bncNetQueryV2(bool secureServer, bool secureClient, int ntripVersion) {
+  _secureServer    = secureServer;
+  _secureClient    = secureClient;
+  _ntripVersion    = ntripVersion;
   _manager   = new QNetworkAccessManager(this);
   connect(_manager, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy&,
                                                        QAuthenticator*)),
@@ -40,7 +42,7 @@ bncNetQueryV2::bncNetQueryV2(bool secure) {
   _sslIgnoreErrors =
      (Qt::CheckState(settings.value("sslIgnoreErrors").toInt()) == Qt::Checked);
 
-  if (_secure && !QSslSocket::supportsSsl()) {
+  if (_secureServer && !QSslSocket::supportsSsl()) {
     BNC_CORE->slotMessage("No SSL support, install OpenSSL run-time libraries", true);
     stop();
   }
@@ -115,7 +117,7 @@ void bncNetQueryV2::startRequestPrivate(const QUrl& url, const QByteArray& gga,
   // -----------------------
   _url = url;
   if (_url.scheme().isEmpty()) {
-    if (_secure) {
+    if (_secureServer) {
       _url.setScheme("https");
     }
     else {

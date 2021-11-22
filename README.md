@@ -14,3 +14,10 @@
 ## Accessing the container
 ```ssh -X -p 9022 root@localhost``` 
 On windows you can for example use [MobaXterm](https://mobaxterm.mobatek.net/) to access ssh wit X-support
+
+## Using client certificate for two-sided TLS
+
+In menu General
+* Provide path to ca-cert store (/etc/ssl/cacert/)
+* Provice full path to client certifcate
+* Provice full path to client private key

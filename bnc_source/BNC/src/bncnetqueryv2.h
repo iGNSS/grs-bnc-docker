@@ -7,7 +7,7 @@ class bncNetQueryV2 : public bncNetQuery {
  Q_OBJECT
 
  public:
-  bncNetQueryV2(bool secure);
+  bncNetQueryV2(bool secureServer, bool secureClient, int ntripVersion);
   virtual ~bncNetQueryV2();
 
   virtual void stop();
@@ -28,8 +28,10 @@ class bncNetQueryV2 : public bncNetQuery {
   QNetworkReply*         _reply;
   QEventLoop*            _eventLoop;
   bool                   _firstData;
-  bool                   _secure;
+  bool                   _secureServer;
+  bool                   _secureClient;
   bool                   _sslIgnoreErrors;
+  int                    _ntripVersion;
 };
 
 #endif

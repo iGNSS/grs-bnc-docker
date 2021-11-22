@@ -174,6 +174,8 @@ bncWindow::bncWindow() {
           this, SLOT(slotBncTextChanged()));
 
   _sslCaCertPathLineEdit   = new QLineEdit(settings.value("sslCaCertPath").toString());
+  _sslClientCertPathLineEdit   = new QLineEdit(settings.value("sslClientCertPath").toString());
+  _sslClientKeyPathLineEdit   = new QLineEdit(settings.value("sslClientKeyPath").toString());
   _sslIgnoreErrorsCheckBox = new QCheckBox();
   _sslIgnoreErrorsCheckBox->setCheckState(Qt::CheckState(
                                           settings.value("sslIgnoreErrors").toInt()));
@@ -645,11 +647,15 @@ bncWindow::bncWindow() {
   pLayout->addWidget(new QLabel("Proxy port"),                               2, 0);
   pLayout->addWidget(_proxyPortLineEdit,                                     2, 1);
   pLayout->addWidget(new QLabel("Path to SSL certificates"),                 3, 0);
-  pLayout->addWidget(_sslCaCertPathLineEdit,                                 3, 1, 1,10);
-  pLayout->addWidget(new QLabel("Default:  " + bncSslConfig::defaultPath()), 3,11, 1,20);
-  pLayout->addWidget(new QLabel("Ignore SSL authorization errors"),          4, 0);
-  pLayout->addWidget(_sslIgnoreErrorsCheckBox,                               4, 1, 1,10);
-  pLayout->addWidget(new QLabel(""),                                         5, 1);
+  pLayout->addWidget(_sslCaCertPathLineEdit,                                 3, 1, 1,20);
+  pLayout->addWidget(new QLabel("Default:  " + bncSslConfig::defaultPath()), 3,21, 1,30);
+  pLayout->addWidget(new QLabel("Full path to SSL client certificate file"), 4, 0);
+  pLayout->addWidget(_sslClientCertPathLineEdit,                             4, 1, 1,20);
+  pLayout->addWidget(new QLabel("Full path to SSL client private key file"), 5, 0);
+  pLayout->addWidget(_sslClientKeyPathLineEdit,                              5, 1, 1,20);
+  pLayout->addWidget(new QLabel("Ignore SSL authorization errors"),          6, 0);
+  pLayout->addWidget(_sslIgnoreErrorsCheckBox,                               6, 1, 1,20);
+  pLayout->addWidget(new QLabel(""),                                         7, 1);
   pLayout->setRowStretch(6, 999);
 
   pgroup->setLayout(pLayout);
@@ -1226,6 +1232,8 @@ bncWindow::bncWindow() {
   _proxyHostLineEdit->setWhatsThis(tr("<p>If you are running BNC within a protected Local Area Network (LAN), you may need to use a proxy server to access the Internet. Enter your proxy server IP and port number in case one is operated in front of BNC. If you do not know the IP and port of your proxy server, check the proxy server settings in your Internet browser or ask your network administrator.</p><p>Note that IP streaming is sometimes not allowed in a LAN. In this case you need to ask your network administrator for an appropriate modification of the local security policy or for the installation of a TCP relay to the Ntrip Broadcasters. If this is not possible, you may need to run BNC outside your LAN on a network that has unobstructed connection to the Internet.</p>"));
   _proxyPortLineEdit->setWhatsThis(tr("<p>Enter your proxy server port number in case a proxy is operated in front of BNC.</p>"));
   _sslCaCertPathLineEdit->setWhatsThis(tr("<p>Communication with an Ntrip Broadcaster over SSL requires the exchange of client and/or server certificates. Specify the path to a directory where you save certificates on your system. Don't try communication via SSL if you are not sure whether this is supported by the involved Ntrip Broadcaster.</p><p>Note that SSL communication is usually done over port 443.</p>"));
+  _sslClientCertPathLineEdit->setWhatsThis(tr("<p>Communication with an Ntrip Broadcaster over SSL requires the exchange of client and/or server certificates. Specify the full path to the client certificate on your system. Don't try communication via tow sided SSL if you are not sure whether this is supported by the involved Ntrip Broadcaster.</p><p>Note that SSL communication is usually done over port 443.</p>"));
+  _sslClientKeyPathLineEdit->setWhatsThis(tr("<p>Communication with an Ntrip Broadcaster over SSL requires the exchange of client and/or server certificates. Specify the full path to the client private key on your system. Don't try communication via tow sided SSL if you are not sure whether this is supported by the involved Ntrip Broadcaster.</p><p>Note that SSL communication is usually done over port 443.</p>"));
   _sslIgnoreErrorsCheckBox->setWhatsThis(tr("<p>SSL communication may involve queries coming from the Ntrip Broadcaster. Tick 'Ignore SSL authorization errors' if you don't want to be bothered with this.</p>"));
 
   // WhatsThis, General
@@ -1436,6 +1444,8 @@ bncWindow::~bncWindow() {
   delete _proxyHostLineEdit;
   delete _proxyPortLineEdit;
   delete _sslCaCertPathLineEdit;
+  delete _sslClientCertPathLineEdit;
+  delete _sslClientKeyPathLineEdit;
   delete _sslIgnoreErrorsCheckBox;
   delete _logFileLineEdit;
   delete _rawOutFileLineEdit;
@@ -1618,6 +1628,8 @@ void bncWindow::slotAddMountPoints() {
   }
 
   settings.setValue("sslCaCertPath",   _sslCaCertPathLineEdit->text());
+  settings.setValue("sslClientCertPath",   _sslClientCertPathLineEdit->text());
+  settings.setValue("sslClientKeyPath",   _sslClientKeyPathLineEdit->text());
   settings.setValue("sslIgnoreErrors", _sslIgnoreErrorsCheckBox->checkState());
 
   QMessageBox msgBox;
@@ -1853,6 +1865,8 @@ void bncWindow::saveOptions() {
   settings.setValue("proxyHost",   _proxyHostLineEdit->text());
   settings.setValue("proxyPort",   _proxyPortLineEdit->text());
   settings.setValue("sslCaCertPath",   _sslCaCertPathLineEdit->text());
+  settings.setValue("sslClientCertPath",   _sslClientCertPathLineEdit->text());
+  settings.setValue("sslClientKeyPath",   _sslClientKeyPathLineEdit->text());
   settings.setValue("sslIgnoreErrors",  _sslIgnoreErrorsCheckBox->checkState());
 // General
   settings.setValue("logFile",     _logFileLineEdit->text());

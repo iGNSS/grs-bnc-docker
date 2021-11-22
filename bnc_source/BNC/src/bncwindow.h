@@ -127,6 +127,8 @@ class bncWindow : public QMainWindow {
     QLineEdit* _proxyHostLineEdit;
     QLineEdit* _proxyPortLineEdit;
     QLineEdit* _sslCaCertPathLineEdit;
+    QLineEdit* _sslClientCertPathLineEdit;
+    QLineEdit* _sslClientKeyPathLineEdit;
     QCheckBox* _sslIgnoreErrorsCheckBox;
     QLineEdit* _outFileLineEdit;
     QLineEdit* _outPortLineEdit;
