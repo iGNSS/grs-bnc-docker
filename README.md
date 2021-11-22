@@ -21,3 +21,6 @@ In menu General
 * Provide path to ca-cert store (/etc/ssl/cacert/)
 * Provice full path to client certifcate
 * Provice full path to client private key
+
+![alt text](./images/screenshot.png)
+
