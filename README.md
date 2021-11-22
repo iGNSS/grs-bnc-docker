@@ -9,7 +9,7 @@
 ```docker build --rm -t gird:bnc .```
 
 ## Running the container
-```docker run -d -p 9022:22 --name bnc gi.rd:bnc```
+```docker run -d -p 9022:22 --name bnc gird:bnc```
 
 ## Accessing the container
 ```ssh -X -p 9022 root@localhost``` 
